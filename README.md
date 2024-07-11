@@ -38,18 +38,58 @@ PKU 的编译原理实践实验
 sudo apt install docker.io
 
 # 配置阿里镜像源
+# 配错了可以cd到对应目录sudo rm再重新配（简单快捷）
 sudo mkdir -p /etc/docker
 sudo tee /etc/docker/daemon.json <<-'EOF'
 {
-  "registry-mirrors": ["https://yxzrazem.mirror.aliyuncs.com"]
+  "registry-mirrors": ["https://ustc-edu-cn.mirror.aliyuncs.com",
+                        "https://hub-mirror.c.163.com",
+                        "https://yxzrazem.mirror.aliyuncs.com"，
+                        "https://mirror.baidubce.com",
+                        "https://hub-mirror.c.163.com",
+                        "https://registry.docker-cn.com"
+                      ]
 }
 EOF
 sudo systemctl daemon-reload
 sudo systemctl restart docker
 
+docker info
+
 # 拉取dev
 sudo docker pull maxxing/compiler-dev
 ```
+
+---
+
+另一种替代方案（适用于不能联网的机器）
+
+    本人的虚拟机设置了NAT但依然无法与宿主机共享VPN
+    同时也无法从上面的三个国内源拉取（就很神秘）
+    这也许是上面所有方案失败的原因
+
+可以找一个能下载的机器（或者云平台）进行上面的操作，确认`sha`后手动打包传送
+
+使用`docker pull`下载的镜像会被存储在 Docker 的默认数据目录中。在 Linux 系统中，这个目录通常是`/var/lib/docker`。在 Windows 系统中，这个目录通常是`C:\ProgramData\Docker`。
+
+1. **导出镜像**：在源机器上，使用`docker save`命令将 Docker 镜像导出为 tar 文件。例如：
+   ```bash
+   sudo docker save maxxing/compiler-dev -o maxxing_compiler-dev.tar
+   # 不更改权限动不了，一般都会自动上锁（除root用户外）
+   sudo chmod 777 maxxing_compiler-dev.tar
+   ```
+2. **传输 tar 文件**：将 tar 文件从源机器复制到目标机器，建议下载后传入共享文件夹（第一次需要设置并重启）
+
+   ```bash
+   sudo usermod -a -G vboxsf $(whoami)
+   ```
+
+3. **导入镜像**：在目标机器上，使用`docker load`命令从 tar 文件导入 Docker 镜像 ¹⁴⁵。例如：
+   ```bash
+   sudo docker load -i maxxing_compiler-dev.tar
+   ```
+
+这样就可以在目标机器上使用`maxxing/compiler-dev`镜像了
 
 ### 基本操作
 
