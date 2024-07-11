@@ -48,7 +48,7 @@ sudo systemctl daemon-reload
 sudo systemctl restart docker
 
 # 拉取dev
-
+sudo docker pull maxxing/compiler-dev
 ```
 
 ### 基本操作
